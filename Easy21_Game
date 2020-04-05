@@ -1,0 +1,45 @@
+import numpy as np
+
+def hit(hand_total):
+
+  # Identify Number of Card from Uniform distribution of values 1-10
+  card_value = np.random.randint(1,11)
+
+  # Identify Color of Card: 1/3 chance it is Red (Negative Value), 2/3 chance it is Black (Positive Value)
+  if np.random.randint(1,4) == 1:
+    card_color = "red"
+    card_value = -1 * card_value
+  else:
+    card_color = "black"
+    # keep card_value the same
+
+  # Identify new hand total value and return it
+  hand_total = hand_total + card_value
+  return hand_total
+
+def first_turn():
+  # Draw first cards - which must be one positive-value (Black) card per player
+  dealer_hand_value = np.random.randint(1,11)
+  agent_hand_value = np.random.randint(1,11)
+
+  return dealer_hand_value, agent_hand_value
+
+def step(s, a):
+  r = 0
+  if a == "hit": # When Agent chooses to Hit
+    agent_hand_value = hit(agent_hand_value)
+    if (agent_hand_value > 21) or (agent_hand_value < 1):
+      r = -1 # Agent busts
+  else: # When Agent chooses to Stick, play out dealer's turn
+    while (dealer_hand_value < 17) and (dealer_hand_value > 0):
+      dealer_hand_value = hit(dealer_hand_value)
+
+    if (dealer_hand_value > 21) or (dealer_hand_value < 1) or (agent_hand_value > dealer_hand_value):
+      r = 1   # Dealer Busts or Hand Value is Greater makes a win
+    elif agent_hand_value == dealer_hand_value:
+      r = 0   # Tie
+    else:
+      r = -1  # Agent Loses
+      
+  s_1 = [dealer_hand_value, agent_hand_value]
+  return s_1, r
